@@ -9,7 +9,7 @@
       <el-button
         icon="el-icon-circle-plus"
         circle
-        @click="addWord"></el-button>
+        @click="addWord"/>
     </el-row>
 
     <el-row>
@@ -18,6 +18,23 @@
         :data="wordList">
         <el-table-column prop="word" label="word"></el-table-column>
         <el-table-column prop="means" label="means"></el-table-column>
+
+        <el-table-column label="symbols">
+          <template slot-scope="scope">
+            <div v-if="scope.row.am !== undefined" class="row-word-symbol">
+              <span>us: </span>
+              <span>[{{ scope.row.am.symbol }}]</span>
+              <mini-audio :src="scope.row.am.audio"/>
+            </div>
+
+            <div v-if="scope.row.uk !== undefined" class="row-word-symbol">
+              <span>uk: </span>
+              <span>[{{ scope.row.uk.symbol }}]</span>
+              <mini-audio :src="scope.row.uk.audio"/>
+            </div>
+          </template>
+        </el-table-column>
+
         <el-table-column
           label="remove"
           width="100px">
@@ -25,8 +42,7 @@
             <el-button
               icon="el-icon-remove"
               circle
-              @click.native.prevent="delWord(scope.$index)">
-            </el-button>
+              @click.native.prevent="delWord(scope.$index)"/>
           </template>
         </el-table-column>
       </el-table>
@@ -35,8 +51,8 @@
 </template>
 
 <script>
-import FanyiBaidu from '@/js/FanyiBaidu.js'
-console.log(process.env)
+import FanyiBaidu from '@/js/FanyiBaidu'
+import MiniAudio from '@/components/MiniAudio'
 
 export default {
   mixins: [FanyiBaidu],
@@ -49,16 +65,15 @@ export default {
     }
   },
 
+  components: {
+    'mini-audio': MiniAudio
+  },
+
   methods: {
     addWord () {
       if (this.inputWord !== '') {
-        this.get_trans(this.inputWord, 'en', 'zh', this.addWordInfo)
-        // this.wordList.push({
-        //   id: this.wordCurrentId,
-        //   word: this.inputWord
-        // })
-        // this.inputWord = ''
-        // this.wordCurrentId += 1
+        this.get_trans(this.inputWord, 'en', 'zh',
+          this.addWordInfo, this.getWordInfoFail)
       } else {
         this.$message({
           type: 'error',
@@ -67,17 +82,48 @@ export default {
       }
     },
 
+    wordMeans (means) {
+      return means.join()
+    },
+
     delWord (idx) {
-      console.log(idx)
       this.wordList.splice(idx, 1)
     },
 
-    addWordInfo (res) {
-      this.wordList.push({
-        id: this.wordCurrentId,
-        word: res.data.dict.word_name,
-        means: res.data.dict.word_means
+    getWordInfoFail (err) {
+      console.log(err)
+      this.$message({
+        type: 'error',
+        message: 'get translate fail'
       })
+    },
+
+    addWordInfo (res) {
+      var dict = res.data.dict
+      var symbols = dict.symbols[0]
+
+      var obj = {
+        id: this.wordCurrentId,
+        word: dict.word_name,
+        means: dict.word_means.join('; '),
+        symbols: dict.symbols[0]
+      }
+
+      if (symbols.ph_am !== undefined) {
+        obj['am'] = {
+          'symbol': symbols.ph_am,
+          'audio': this.get_audio_url(dict.word_name, 'en')
+        }
+      }
+
+      if (symbols.ph_am !== undefined) {
+        obj['uk'] = {
+          'symbol': symbols.ph_en,
+          'audio': this.get_audio_url(dict.word_name, 'uk')
+        }
+      }
+
+      this.wordList.push(obj)
       this.inputWord = ''
       this.wordCurrentId += 1
     }
@@ -89,7 +135,19 @@ export default {
 .el-row {
   margin: 10px 0;
 }
+
 .el-row .el-input {
   width: 50%;
+}
+
+.el-row .row-word-symbol {
+  width: 100%;
+  float: left;
+}
+
+.el-row .row-word-symbol span {
+  margin: 0 5px;
+  padding: 5px 0;
+  float: left;
 }
 </style>

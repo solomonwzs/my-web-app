@@ -1,4 +1,4 @@
-package main
+package baidu
 
 import (
 	"bytes"
@@ -9,12 +9,25 @@ import (
 	"io"
 	"math/rand"
 	"net/http"
+	"os"
 	"strconv"
+	"time"
 )
 
 const (
-	baiduFanyiApiUrl = "http://api.fanyi.baidu.com/api/trans/vip/translate"
+	baiduFanyiAPIURL = "http://api.fanyi.baidu.com/api/trans/vip/translate"
 )
+
+var (
+	strBaiduAppID = os.Getenv("BAIDU_APPID")
+	baiduKey      = os.Getenv("BAIDU_KEY")
+	baiduAppID    int64
+)
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+	baiduAppID, _ = strconv.ParseInt(strBaiduAppID, 10, 64)
+}
 
 func genSalt() string {
 	i := uint64(rand.Int63())
@@ -27,7 +40,7 @@ func newBaiduTransRequest(q, from, to string) (req *http.Request, err error) {
 	salt := rand.Int()
 
 	h := md5.New()
-	io.WriteString(h, strBaiduAppId)
+	io.WriteString(h, strBaiduAppID)
 	io.WriteString(h, q)
 	io.WriteString(h, strconv.Itoa(salt))
 	io.WriteString(h, baiduKey)
@@ -37,7 +50,7 @@ func newBaiduTransRequest(q, from, to string) (req *http.Request, err error) {
 		"q":     q,
 		"from":  from,
 		"to":    to,
-		"appid": baiduAppId,
+		"appid": baiduAppID,
 		"salt":  salt,
 		"sign":  sign,
 	}
@@ -47,5 +60,5 @@ func newBaiduTransRequest(q, from, to string) (req *http.Request, err error) {
 		return
 	}
 
-	return http.NewRequest("POST", baiduFanyiApiUrl, bytes.NewBuffer(b))
+	return http.NewRequest("POST", baiduFanyiAPIURL, bytes.NewBuffer(b))
 }

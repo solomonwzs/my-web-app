@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -26,7 +25,6 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 		} else if k != "X-Forward" {
 			req.Header.Set(k, v[0])
 		}
-		fmt.Printf("%v %v\n", k, v)
 	}
 
 	client := &http.Client{}
