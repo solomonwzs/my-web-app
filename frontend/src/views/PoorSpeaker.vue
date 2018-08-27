@@ -6,7 +6,9 @@
         v-model="inputWord"
         clearable>
       </el-input>
-      <el-button icon="el-icon-circle-plus"
+      <el-button
+        icon="el-icon-circle-plus"
+        circle
         @click="addWord"></el-button>
     </el-row>
 
@@ -15,11 +17,14 @@
         border
         :data="wordList">
         <el-table-column prop="word" label="word"></el-table-column>
+        <el-table-column prop="means" label="means"></el-table-column>
         <el-table-column
           label="remove"
           width="100px">
           <template slot-scope="scope">
-            <el-button icon="el-icon-remove"
+            <el-button
+              icon="el-icon-remove"
+              circle
               @click.native.prevent="delWord(scope.$index)">
             </el-button>
           </template>
@@ -31,6 +36,7 @@
 
 <script>
 import FanyiBaidu from '@/js/FanyiBaidu.js'
+console.log(process.env)
 
 export default {
   mixins: [FanyiBaidu],
@@ -67,8 +73,14 @@ export default {
     },
 
     addWordInfo (res) {
-      console.log(res)
-    } 
+      this.wordList.push({
+        id: this.wordCurrentId,
+        word: res.data.dict.word_name,
+        means: res.data.dict.word_means
+      })
+      this.inputWord = ''
+      this.wordCurrentId += 1
+    }
   }
 }
 </script>
