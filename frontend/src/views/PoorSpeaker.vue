@@ -46,7 +46,16 @@
           </template>
         </el-table-column>
       </el-table>
+
+      <div class="button-panel">
+        <el-button
+          @click="generateExercise"
+          round>
+          generate exercise
+        </el-button>
+      </div>
     </el-row>
+
   </div>
 </template>
 
@@ -61,12 +70,19 @@ export default {
     return {
       wordCurrentId: 0,
       inputWord: '',
-      wordList: []
+      wordList: [],
+      exercise: []
     }
   },
 
   components: {
     'mini-audio': MiniAudio
+  },
+
+  computed: {
+    hasWords () {
+      return this.wordList.length !== 0
+    }
   },
 
   methods: {
@@ -80,6 +96,10 @@ export default {
           message: 'please input a word'
         })
       }
+    },
+
+    generateExercise () {
+      console.log('hello')
     },
 
     wordMeans (means) {
@@ -149,5 +169,9 @@ export default {
   margin: 0 5px;
   padding: 5px 0;
   float: left;
+}
+
+.el-row .button-panel {
+  margin: 5px 0;
 }
 </style>

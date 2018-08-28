@@ -6,6 +6,10 @@ import (
 	"strconv"
 )
 
+const (
+	userAgent = "Mozilla/5.0 (Linux; Android 5.1.1; Nexus 6 Build/LYZ28E) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Mobile Safari/537.36"
+)
+
 func proxyRequest(w http.ResponseWriter, r *http.Request) {
 	forward := r.Header.Get("X-Forward")
 	if forward == "" {
@@ -26,6 +30,7 @@ func proxyRequest(w http.ResponseWriter, r *http.Request) {
 			req.Header.Set(k, v[0])
 		}
 	}
+	req.Header.Set("User-Agent", userAgent)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
