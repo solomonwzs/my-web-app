@@ -1,62 +1,111 @@
 <template>
-  <div>
-    <el-row>
-      <el-input
-        placeholder="please input a word"
-        v-model="inputWord"
-        clearable>
-      </el-input>
-      <el-button
-        icon="el-icon-circle-plus"
-        circle
-        @click="addWord"/>
-    </el-row>
+    <v-layout row wrap>
+      <v-flex>
+        <v-text-field label="Please input a word"
+                      v-model="inputWord"
+                      clearable>
+        </v-text-field>
+        <v-btn small
+               color="primary"
+               @click="addWord">
+          add</v-btn>
+      </v-flex>
+    </v-layout>
 
-    <el-row>
-      <el-table
-        border
-        :data="wordList">
-        <el-table-column prop="word" label="word"></el-table-column>
-        <el-table-column prop="means" label="means"></el-table-column>
+    <!-- <el-row> -->
+    <!--   <div v-for="(word, idx) in wordList" v-bind:key="word.id"> -->
+    <!--     <span>{{ word.word }}</span> -->
+    <!--     <span>{{ idx }}</span> -->
+    <!--     <el-button round -->
+    <!--                plain -->
+    <!--                type="danger" -->
+    <!--                @click="delWord(idx)"> -->
+    <!--       remove -->
+    <!--     </el-button> -->
+    <!--     <mini-audio :src="word.am.audio"/> -->
+    <!--   </div> -->
+      <!-- <el-table border :data="wordList"> -->
+      <!--   <el-table-column prop="word" label="word"></el-table-column> -->
+      <!--   <el-table-column prop="means" label="means"></el-table-column> -->
 
-        <el-table-column label="symbols">
-          <template slot-scope="scope">
-            <div v-if="scope.row.am !== undefined" class="row-word-symbol">
-              <span>us: </span>
-              <span>[{{ scope.row.am.symbol }}]</span>
-              <mini-audio :src="scope.row.am.audio"/>
-            </div>
+      <!--   <el-table-column label="symbols"> -->
+      <!--     <template slot-scope="scope"> -->
+      <!--       <div v-if="scope.row.am !== undefined" -->
+      <!--            class="row-word-symbol"> -->
+      <!--         <span>us: </span> -->
+      <!--         <span>[{{ scope.row.am.symbol }}]</span> -->
+      <!--         <mini-audio :src="scope.row.am.audio"/> -->
+      <!--       </div> -->
 
-            <div v-if="scope.row.uk !== undefined" class="row-word-symbol">
-              <span>uk: </span>
-              <span>[{{ scope.row.uk.symbol }}]</span>
-              <mini-audio :src="scope.row.uk.audio"/>
-            </div>
-          </template>
-        </el-table-column>
+      <!--       <div v-if="scope.row.uk !== undefined" -->
+      <!--            class="row-word-symbol"> -->
+      <!--         <span>uk: </span> -->
+      <!--         <span>[{{ scope.row.uk.symbol }}]</span> -->
+      <!--         <mini-audio :src="scope.row.uk.audio"/> -->
+      <!--       </div> -->
+      <!--     </template> -->
+      <!--   </el-table-column> -->
 
-        <el-table-column
-          label="remove"
-          width="100px">
-          <template slot-scope="scope">
-            <el-button
-              icon="el-icon-remove"
-              circle
-              @click.native.prevent="delWord(scope.$index)"/>
-          </template>
-        </el-table-column>
-      </el-table>
+      <!--   <el-table-column label="remove" -->
+      <!--                    width="100px"> -->
+      <!--     <template slot-scope="scope"> -->
+      <!--       <el-button round -->
+      <!--                  plain -->
+      <!--                  type="danger" -->
+      <!--                  @click="delWord(scope.$index)"> -->
+      <!--         remove -->
+      <!--       </el-button> -->
+      <!--     </template> -->
+      <!--   </el-table-column> -->
+      <!-- </el-table> -->
 
-      <div class="button-panel">
-        <el-button
-          @click="generateExercise"
-          round>
-          generate exercise
-        </el-button>
-      </div>
-    </el-row>
+      <!-- <div class="button-panel"> -->
+      <!--   <el-button round -->
+      <!--              plain -->
+      <!--              type="primary" -->
+      <!--              @click="generateExercise"> -->
+      <!--     generate exercise -->
+      <!--   </el-button> -->
+      <!-- </div> -->
+    <!-- </el-row> -->
 
-  </div>
+    <!-- <el-row> -->
+      <!-- <el-table -->
+      <!--   border -->
+      <!--   :data="exercise"> -->
+      <!--   <el-table-column label="audio" width="100px"> -->
+      <!--     <template slot-scope="scope"> -->
+      <!--       <mini-audio :src="scope.row.audio"/> -->
+      <!--     </template> -->
+      <!--   </el-table-column> -->
+
+      <!--   <el-table-column label="option"> -->
+      <!--     <template slot-scope="scope"> -->
+      <!--       <div class="answer" -->
+      <!--            v-bind:class="{'answer-error': scope.row.err}"> -->
+      <!--         <el-radio-group size="mini" v-model="scope.row.answer"> -->
+      <!--           <el-radio v-for="word in wordList" -->
+      <!--                     v-bind:key="word.id" -->
+      <!--                     v-bind:label="word.id" -->
+      <!--                     border> -->
+      <!--             {{ word.word }} -->
+      <!--           </el-radio> -->
+      <!--         </el-radio-group> -->
+      <!--       </div> -->
+      <!--     </template> -->
+      <!--   </el-table-column> -->
+      <!-- </el-table> -->
+
+      <!-- <div class="button-panel"> -->
+      <!--   <el-button round -->
+      <!--              plain -->
+      <!--              type="primary" -->
+      <!--              @click="submitExercise"> -->
+      <!--     submit -->
+      <!--   </el-button> -->
+      <!-- </div> -->
+    <!-- </el-row> -->
+
 </template>
 
 <script>
@@ -98,16 +147,48 @@ export default {
       }
     },
 
-    generateExercise () {
-      console.log('hello')
+    getRandomInt(max) {
+      return Math.floor(Math.random() * Math.floor(max));
     },
 
-    wordMeans (means) {
-      return means.join()
+    getWordAudio(word) {
+      if (word.am !== undefined && word.uk !== undefined) {
+        var r = this.getRandomInt(2)
+        return r === 0 ? word.am.audio : word.uk.audio
+      } else if (word.am !== undefined) {
+        return word.am.audio
+      } else {
+        return word.uk.audio
+      }
+    },
+
+    generateExercise () {
+      this.exercise = []
+
+      var n = this.wordList.length * 4
+      for (var i = 0; i < n; i++) {
+        var j = this.getRandomInt(this.wordList.length)
+        var word = this.wordList[j]
+
+        var exer = {
+          wid: word.id,
+          audio: this.getWordAudio(word),
+          answer: undefined,
+          err: false
+        }
+        this.exercise.push(exer)
+      }
+    },
+
+    submitExercise () {
+      for (var i in this.exercise) {
+        var exer = this.exercise[i]
+        this.$set(exer, 'err', exer.wid !== exer.answer)
+      }
     },
 
     delWord (idx) {
-      this.wordList.splice(idx, 1)
+      this.$delete(this.wordList, idx)
     },
 
     getWordInfoFail (err) {
@@ -152,26 +233,4 @@ export default {
 </script>
 
 <style>
-.el-row {
-  margin: 10px 0;
-}
-
-.el-row .el-input {
-  width: 50%;
-}
-
-.el-row .row-word-symbol {
-  width: 100%;
-  float: left;
-}
-
-.el-row .row-word-symbol span {
-  margin: 0 5px;
-  padding: 5px 0;
-  float: left;
-}
-
-.el-row .button-panel {
-  margin: 5px 0;
-}
 </style>

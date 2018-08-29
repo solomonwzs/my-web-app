@@ -3,10 +3,6 @@
     <audio ref="audio">
       <source :src="src">
     </audio>
-    <el-button
-      icon="el-icon-caret-right"
-      @click="play"
-      circle/>
   </div>
 </template>
 
@@ -18,12 +14,10 @@ export default {
     play () {
       this.$refs.audio.play()
     }
+  },
+
+  destroyed () {
+    console.log('destroyed')
   }
 }
 </script>
-
-<style>
-.mini-audio {
-  float: left;
-}
-</style>
