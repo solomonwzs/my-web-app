@@ -3,12 +3,18 @@
     <audio ref="audio">
       <source :src="src">
     </audio>
+    <v-btn
+      :small="small === true"
+      color="info"
+      @click="play">
+      {{ text }}
+    </v-btn>
   </div>
 </template>
 
 <script>
 export default {
-  props: ['src'],
+  props: ['src', 'text', 'small'],
 
   methods: {
     play () {

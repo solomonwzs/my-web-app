@@ -1,16 +1,64 @@
 <template>
-    <v-layout row wrap>
-      <v-flex>
-        <v-text-field label="Please input a word"
-                      v-model="inputWord"
-                      clearable>
-        </v-text-field>
-        <v-btn small
-               color="primary"
-               @click="addWord">
-          add</v-btn>
-      </v-flex>
-    </v-layout>
+  <v-app>
+    <v-snackbar
+      v-model="xMessage.show"
+      :timeout="xMessage.timeout"
+      :color="xMessage.type"
+      :top="true">
+      {{ xMessage.message }}
+    </v-snackbar>
+
+    <v-container grid-list-md text-xs-center>
+      <v-layout row wrap>
+        <v-flex xs9>
+          <v-text-field
+            label="Please input a word"
+            boxdd
+            v-model="inputWord">
+          </v-text-field>
+        </v-flex>
+        <v-flex xs3>
+          <v-btn
+            color="success"
+            @click="addWord">
+            add</v-btn>
+        </v-flex>
+      </v-layout>
+
+      <div v-for="(word, idx) in wordList" v-bind:key="word.id">
+        <v-layout row wrap class="row-word"
+                           v-bind:class="{'row-word-dark': idx % 2 === 0}">
+          <v-flex xs2>
+            <v-card>
+              {{ word.word }}
+            </v-card>
+          </v-flex>
+          <v-flex xs6>
+            <v-card>
+              {{ word.means }}
+            </v-card>
+          </v-flex>
+          <v-flex xs2>
+            <mini-audio
+              :small="true"
+              :src="word.am.audio"
+              :text="'US: [' + word.am.symbol + ']'"/>
+            <mini-audio
+              :small="true"
+              :src="word.uk.audio"
+              :text="'UK: [' + word.uk.symbol + ']'"/>
+          </v-flex>
+          <v-flex xs2>
+            <v-btn
+              small
+              color="error"
+              @click="delWord(idx)">
+              remove</v-btn>
+          </v-flex>
+        </v-layout>
+      </div>
+    </v-container>
+  </v-app>
 
     <!-- <el-row> -->
     <!--   <div v-for="(word, idx) in wordList" v-bind:key="word.id"> -->
@@ -111,15 +159,22 @@
 <script>
 import FanyiBaidu from '@/js/FanyiBaidu'
 import MiniAudio from '@/components/MiniAudio'
+import Message from '@/js/Message'
 
 export default {
-  mixins: [FanyiBaidu],
+  mixins: [FanyiBaidu, Message],
 
   data () {
     return {
+      message: {
+        text: '',
+        timeout: 1000,
+        show: false
+      },
       wordCurrentId: 0,
       inputWord: '',
       wordList: [],
+      wordSet: new Set(),
       exercise: []
     }
   },
@@ -136,14 +191,19 @@ export default {
 
   methods: {
     addWord () {
-      if (this.inputWord !== '') {
-        this.get_trans(this.inputWord, 'en', 'zh',
-          this.addWordInfo, this.getWordInfoFail)
-      } else {
+      if (this.inputWord === '') {
         this.$message({
           type: 'error',
-          message: 'please input a word'
+          message: 'Please input a word'
         })
+      } else if (this.wordSet.has(this.inputWord)){
+        this.$message({
+          type: 'error',
+          message: 'Duplicate word'
+        })
+      } else {
+        this.get_trans(this.inputWord, 'en', 'zh',
+          this.addWordInfo, this.getWordInfoFail)
       }
     },
 
@@ -188,6 +248,7 @@ export default {
     },
 
     delWord (idx) {
+      this.wordSet.delete(this.wordList[idx].word)
       this.$delete(this.wordList, idx)
     },
 
@@ -195,7 +256,7 @@ export default {
       console.log(err)
       this.$message({
         type: 'error',
-        message: 'get translate fail'
+        message: 'Get translate fail'
       })
     },
 
@@ -225,6 +286,7 @@ export default {
       }
 
       this.wordList.push(obj)
+      this.wordSet.add(obj.word)
       this.inputWord = ''
       this.wordCurrentId += 1
     }
@@ -233,4 +295,19 @@ export default {
 </script>
 
 <style>
+* {
+  text-transform: none !important;
+}
+
+.row-word {
+  margin: 5px 0;
+  background: #eee;
+}
+
+.row-word-dark {
+  background: #ddd;
+}
+.row-word .v-card {
+  margin: 6px 0;
+}
 </style>
