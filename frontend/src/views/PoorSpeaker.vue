@@ -11,7 +11,7 @@
     <v-container grid-list-md text-xs-center>
       <div>
         <v-layout row wrap>
-          <v-flex xs9>
+          <v-flex xs6>
             <v-text-field
               label="Please input a word"
               :disabled='!inputEnable'
@@ -19,12 +19,28 @@
               v-model="inputWord">
             </v-text-field>
           </v-flex>
+
           <v-flex xs3>
             <v-btn
               :disabled='!inputEnable'
               color="success"
               @click="addWord">
               add</v-btn>
+          </v-flex>
+
+          <v-flex xs3 class="us-uk-select">
+            <v-checkbox
+              :disabled='!inputEnable'
+              label="US"
+              value="1"
+              v-model="hasUS">
+            </v-checkbox>
+            <v-checkbox
+              :disabled='!inputEnable'
+              label="UK"
+              value="1"
+              v-model="hasUK">
+            </v-checkbox>
           </v-flex>
         </v-layout>
       </div>
@@ -39,11 +55,6 @@
                 {{ word.word }}
               </v-card>
             </v-flex>
-            <v-flex xs6>
-              <v-card>
-                {{ word.means }}
-              </v-card>
-            </v-flex>
             <v-flex xs2>
               <mini-audio
                 :small="true"
@@ -53,6 +64,11 @@
                 :small="true"
                 :src="word.uk.audio"
                 :text="'UK: [' + word.uk.symbol + ']'"/>
+            </v-flex>
+            <v-flex xs6>
+              <v-card>
+                {{ word.means }}
+              </v-card>
             </v-flex>
             <v-flex xs2>
               <v-btn
@@ -143,7 +159,9 @@ export default {
       wordList: [],
       wordSet: new Set(),
       exercise: [],
-      mode: 'input'
+      mode: 'input',
+      hasUS: '1',
+      hasUK: '1'
     }
   },
 
@@ -183,6 +201,7 @@ export default {
 
   methods: {
     addWord () {
+      console.log(this.hasUS)
       if (this.inputWord === '' || this.inputWord === null) {
         this.$message({
           type: 'error',
@@ -204,10 +223,11 @@ export default {
     },
 
     getWordAudio(word) {
-      if (word.am !== undefined && word.uk !== undefined) {
+      if (word.am !== undefined && word.uk !== undefined &&
+        this.hasUS === '1' && this.hasUK ==='1') {
         var r = this.getRandomInt(2)
         return r === 0 ? word.am.audio : word.uk.audio
-      } else if (word.am !== undefined) {
+      } else if (word.am !== undefined && this.hasUS === '1') {
         return word.am.audio
       } else {
         return word.uk.audio
@@ -339,5 +359,10 @@ export default {
 
 .row-word-dark .answer-right {
   background: #afa;
+}
+
+.us-uk-select .v-input--checkbox {
+  width: 40%;
+  float: left;
 }
 </style>
