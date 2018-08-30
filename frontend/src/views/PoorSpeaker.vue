@@ -9,157 +9,124 @@
     </v-snackbar>
 
     <v-container grid-list-md text-xs-center>
-      <v-layout row wrap>
-        <v-flex xs9>
-          <v-text-field
-            label="Please input a word"
-            boxdd
-            v-model="inputWord">
-          </v-text-field>
-        </v-flex>
-        <v-flex xs3>
-          <v-btn
-            color="success"
-            @click="addWord">
-            add</v-btn>
-        </v-flex>
-      </v-layout>
-
-      <div v-for="(word, idx) in wordList" v-bind:key="word.id">
-        <v-layout row wrap class="row-word"
-                           v-bind:class="{'row-word-dark': idx % 2 === 0}">
-          <v-flex xs2>
-            <v-card>
-              {{ word.word }}
-            </v-card>
+      <div>
+        <v-layout row wrap>
+          <v-flex xs9>
+            <v-text-field
+              label="Please input a word"
+              :disabled='!inputEnable'
+              clearable
+              v-model="inputWord">
+            </v-text-field>
           </v-flex>
-          <v-flex xs6>
-            <v-card>
-              {{ word.means }}
-            </v-card>
-          </v-flex>
-          <v-flex xs2>
-            <mini-audio
-              :small="true"
-              :src="word.am.audio"
-              :text="'US: [' + word.am.symbol + ']'"/>
-            <mini-audio
-              :small="true"
-              :src="word.uk.audio"
-              :text="'UK: [' + word.uk.symbol + ']'"/>
-          </v-flex>
-          <v-flex xs2>
+          <v-flex xs3>
             <v-btn
-              small
+              :disabled='!inputEnable'
+              color="success"
+              @click="addWord">
+              add</v-btn>
+          </v-flex>
+        </v-layout>
+      </div>
+
+      <div v-if="showWordList">
+        <div v-for="(word, idx) in wordList" v-bind:key="word.id">
+          <v-layout class="row-word"
+                    v-bind:class="{'row-word-dark': idx % 2 === 0}"
+                    row wrap>
+            <v-flex xs2>
+              <v-card>
+                {{ word.word }}
+              </v-card>
+            </v-flex>
+            <v-flex xs6>
+              <v-card>
+                {{ word.means }}
+              </v-card>
+            </v-flex>
+            <v-flex xs2>
+              <mini-audio
+                :small="true"
+                :src="word.am.audio"
+                :text="'US: [' + word.am.symbol + ']'"/>
+              <mini-audio
+                :small="true"
+                :src="word.uk.audio"
+                :text="'UK: [' + word.uk.symbol + ']'"/>
+            </v-flex>
+            <v-flex xs2>
+              <v-btn
+                small
+                color="error"
+                :disabled='!inputEnable'
+                @click="delWord(idx)">
+                remove</v-btn>
+            </v-flex>
+          </v-layout>
+        </div>
+        <v-layout row wrap>
+          <v-flex xs12>
+            <v-btn
+              color="success"
+              :disabled='!inputEnable'
+              @click="generateExercise">
+              generate exercise
+            </v-btn>
+            <v-btn
               color="error"
-              @click="delWord(idx)">
-              remove</v-btn>
+              :disabled='!inputEnable'
+              @click="clearWordList">
+              clear
+            </v-btn>
+          </v-flex>
+        </v-layout>
+      </div>
+
+      <div v-if="showExercise">
+        <exer-list
+          :exercise="exercise"
+          :wordList="wordList"
+          :mode="mode">
+        </exer-list>
+
+        <v-layout row wrap v-if="mode === 'test-end'">
+          <v-flex xs12>
+            <v-card>{{ testResult }}</v-card>
+          </v-flex>
+        </v-layout>
+
+        <v-layout row wrap>
+          <v-flex xs12>
+            <v-btn
+              color="success"
+              v-if="mode === 'test'"
+              @click="submitExercise">
+              submit
+            </v-btn>
+            <v-btn
+              v-if="mode === 'test-end'"
+              color="success"
+              @click="redoExercise">
+              redo
+            </v-btn>
+            <v-btn
+              color="error"
+              @click="closeExercise">
+              close exercise
+            </v-btn>
           </v-flex>
         </v-layout>
       </div>
     </v-container>
   </v-app>
-
-    <!-- <el-row> -->
-    <!--   <div v-for="(word, idx) in wordList" v-bind:key="word.id"> -->
-    <!--     <span>{{ word.word }}</span> -->
-    <!--     <span>{{ idx }}</span> -->
-    <!--     <el-button round -->
-    <!--                plain -->
-    <!--                type="danger" -->
-    <!--                @click="delWord(idx)"> -->
-    <!--       remove -->
-    <!--     </el-button> -->
-    <!--     <mini-audio :src="word.am.audio"/> -->
-    <!--   </div> -->
-      <!-- <el-table border :data="wordList"> -->
-      <!--   <el-table-column prop="word" label="word"></el-table-column> -->
-      <!--   <el-table-column prop="means" label="means"></el-table-column> -->
-
-      <!--   <el-table-column label="symbols"> -->
-      <!--     <template slot-scope="scope"> -->
-      <!--       <div v-if="scope.row.am !== undefined" -->
-      <!--            class="row-word-symbol"> -->
-      <!--         <span>us: </span> -->
-      <!--         <span>[{{ scope.row.am.symbol }}]</span> -->
-      <!--         <mini-audio :src="scope.row.am.audio"/> -->
-      <!--       </div> -->
-
-      <!--       <div v-if="scope.row.uk !== undefined" -->
-      <!--            class="row-word-symbol"> -->
-      <!--         <span>uk: </span> -->
-      <!--         <span>[{{ scope.row.uk.symbol }}]</span> -->
-      <!--         <mini-audio :src="scope.row.uk.audio"/> -->
-      <!--       </div> -->
-      <!--     </template> -->
-      <!--   </el-table-column> -->
-
-      <!--   <el-table-column label="remove" -->
-      <!--                    width="100px"> -->
-      <!--     <template slot-scope="scope"> -->
-      <!--       <el-button round -->
-      <!--                  plain -->
-      <!--                  type="danger" -->
-      <!--                  @click="delWord(scope.$index)"> -->
-      <!--         remove -->
-      <!--       </el-button> -->
-      <!--     </template> -->
-      <!--   </el-table-column> -->
-      <!-- </el-table> -->
-
-      <!-- <div class="button-panel"> -->
-      <!--   <el-button round -->
-      <!--              plain -->
-      <!--              type="primary" -->
-      <!--              @click="generateExercise"> -->
-      <!--     generate exercise -->
-      <!--   </el-button> -->
-      <!-- </div> -->
-    <!-- </el-row> -->
-
-    <!-- <el-row> -->
-      <!-- <el-table -->
-      <!--   border -->
-      <!--   :data="exercise"> -->
-      <!--   <el-table-column label="audio" width="100px"> -->
-      <!--     <template slot-scope="scope"> -->
-      <!--       <mini-audio :src="scope.row.audio"/> -->
-      <!--     </template> -->
-      <!--   </el-table-column> -->
-
-      <!--   <el-table-column label="option"> -->
-      <!--     <template slot-scope="scope"> -->
-      <!--       <div class="answer" -->
-      <!--            v-bind:class="{'answer-error': scope.row.err}"> -->
-      <!--         <el-radio-group size="mini" v-model="scope.row.answer"> -->
-      <!--           <el-radio v-for="word in wordList" -->
-      <!--                     v-bind:key="word.id" -->
-      <!--                     v-bind:label="word.id" -->
-      <!--                     border> -->
-      <!--             {{ word.word }} -->
-      <!--           </el-radio> -->
-      <!--         </el-radio-group> -->
-      <!--       </div> -->
-      <!--     </template> -->
-      <!--   </el-table-column> -->
-      <!-- </el-table> -->
-
-      <!-- <div class="button-panel"> -->
-      <!--   <el-button round -->
-      <!--              plain -->
-      <!--              type="primary" -->
-      <!--              @click="submitExercise"> -->
-      <!--     submit -->
-      <!--   </el-button> -->
-      <!-- </div> -->
-    <!-- </el-row> -->
-
 </template>
 
 <script>
 import FanyiBaidu from '@/js/FanyiBaidu'
-import MiniAudio from '@/components/MiniAudio'
 import Message from '@/js/Message'
+
+import MiniAudio from '@/components/MiniAudio'
+import ExerciseList from '@/components/ExerciseList'
 
 export default {
   mixins: [FanyiBaidu, Message],
@@ -175,23 +142,48 @@ export default {
       inputWord: '',
       wordList: [],
       wordSet: new Set(),
-      exercise: []
+      exercise: [],
+      mode: 'input'
     }
   },
 
   components: {
-    'mini-audio': MiniAudio
+    'mini-audio': MiniAudio,
+    'exer-list': ExerciseList
   },
 
   computed: {
-    hasWords () {
-      return this.wordList.length !== 0
+    inputEnable () {
+      return this.mode === 'input'
+    },
+
+    showWordList () {
+      return this.wordList.length > 0
+    },
+
+    showExercise () {
+      return this.mode.substr(0, 4) === 'test'
+    },
+
+    testResult () {
+      var n = this.exercise.length
+      var r = 0
+      var e = 0
+      for (var i in this.exercise) {
+        var exer = this.exercise[i]
+        if (exer.wid === exer.answer) {
+          r += 1
+        } else {
+          e += 1
+        }
+      }
+      return 'all: ' + n + ', right: ' + r + ', error: ' + e
     }
   },
 
   methods: {
     addWord () {
-      if (this.inputWord === '') {
+      if (this.inputWord === '' || this.inputWord === null) {
         this.$message({
           type: 'error',
           message: 'Please input a word'
@@ -222,8 +214,18 @@ export default {
       }
     },
 
+    clearWordList () {
+      this.wordSet = new Set()
+      this.wordList = []
+    },
+
+    closeExercise () {
+      this.mode = 'input'
+    },
+
     generateExercise () {
       this.exercise = []
+      this.mode = 'test'
 
       var n = this.wordList.length * 4
       for (var i = 0; i < n; i++) {
@@ -231,19 +233,31 @@ export default {
         var word = this.wordList[j]
 
         var exer = {
+          id: i,
           wid: word.id,
+          word: word.word,
           audio: this.getWordAudio(word),
           answer: undefined,
-          err: false
+          result: undefined
         }
         this.exercise.push(exer)
       }
     },
 
     submitExercise () {
+      this.mode = 'test-end'
       for (var i in this.exercise) {
         var exer = this.exercise[i]
-        this.$set(exer, 'err', exer.wid !== exer.answer)
+        this.$set(exer, 'result', exer.wid === exer.answer)
+      }
+    },
+
+    redoExercise () {
+      this.mode = 'test'
+      for (var i in this.exercise) {
+        var exer = this.exercise[i]
+        this.$set(exer, 'answer', undefined)
+        this.$set(exer, 'result', undefined)
       }
     },
 
@@ -300,7 +314,7 @@ export default {
 }
 
 .row-word {
-  margin: 5px 0;
+  margin: 10px 0;
   background: #eee;
 }
 
@@ -309,5 +323,21 @@ export default {
 }
 .row-word .v-card {
   margin: 6px 0;
+}
+
+.row-word .answer-error {
+  background: #fcc;
+}
+
+.row-word-dark .answer-error {
+  background: #faa;
+}
+
+.row-word .answer-right {
+  background: #cfc;
+}
+
+.row-word-dark .answer-right {
+  background: #afa;
 }
 </style>

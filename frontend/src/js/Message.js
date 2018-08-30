@@ -1,5 +1,3 @@
-import Vue from 'vue'
-
 export default {
   data () {
     return {
@@ -14,11 +12,11 @@ export default {
 
   methods: {
     $message (msg) {
-      Vue.set(this.xMessage, 'type', 'info')
+      this.$set(this.xMessage, 'type', 'info')
       for (var k in msg) {
-        Vue.set(this.xMessage, k, msg[k])
+        this.$set(this.xMessage, k, msg[k])
       }
-      Vue.set(this.xMessage, 'show', true)
+      this.$set(this.xMessage, 'show', true)
     }
   }
 }
